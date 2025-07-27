@@ -1469,6 +1469,31 @@
                 background: rgba(255, 255, 255, 0.95) !important;
                 border: 1px solid #e0e0e0 !important;
             }
+            
+            /* Fix checkbox visibility and functionality */
+            input[type="checkbox"] {
+                -webkit-appearance: checkbox !important;
+                appearance: checkbox !important;
+                background: white !important;
+                border: 2px solid #ddd !important;
+                width: 18px !important;
+                height: 18px !important;
+                cursor: pointer !important;
+                margin-right: 8px !important;
+            }
+            
+            input[type="checkbox"]:checked {
+                background: #3498db !important;
+                border-color: #3498db !important;
+            }
+            
+            /* Fix checkbox label */
+            label[style*="cursor: pointer"] {
+                cursor: pointer !important;
+                color: #2c3e50 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
         }
     </style>
 </head>
@@ -3825,6 +3850,26 @@
                     dragArea.style.backdropFilter = 'none';
                     dragArea.style.webkitBackdropFilter = 'none';
                 }
+                
+                // Fix checkbox functionality
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.style.webkitAppearance = 'checkbox';
+                    checkbox.style.appearance = 'checkbox';
+                    checkbox.style.width = '18px';
+                    checkbox.style.height = '18px';
+                    checkbox.style.cursor = 'pointer';
+                    checkbox.style.marginRight = '8px';
+                    
+                    // Ensure the checkbox is clickable
+                    checkbox.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Force the checked state
+                        setTimeout(() => {
+                            console.log('Checkbox clicked, checked:', this.checked);
+                        }, 0);
+                    });
+                });
                 
                 console.log('Safari text and background visibility fixes applied');
             }
