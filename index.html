@@ -1365,6 +1365,39 @@
                 background: rgba(255, 255, 255, 0.95) !important;
             }
         }
+        
+        /* Safari-specific fixes for all screen sizes */
+        @supports (-webkit-appearance: none) {
+            /* This targets Safari specifically */
+            h2[style*="background-clip: text"],
+            h2[style*="-webkit-background-clip: text"] {
+                background: none !important;
+                color: #2c3e50 !important;
+                -webkit-text-fill-color: #2c3e50 !important;
+                -webkit-background-clip: unset !important;
+                background-clip: unset !important;
+            }
+            
+            p[style*="color: var(--text-secondary)"] {
+                color: #34495e !important;
+                -webkit-text-fill-color: #34495e !important;
+            }
+            
+            *[style*="-webkit-text-fill-color: transparent"] {
+                -webkit-text-fill-color: #2c3e50 !important;
+                color: #2c3e50 !important;
+            }
+            
+            /* Force text visibility on Safari */
+            * {
+                -webkit-text-fill-color: unset !important;
+            }
+            
+            h1, h2, h3, h4, h5, h6, p, span, div, label {
+                color: #2c3e50 !important;
+                -webkit-text-fill-color: #2c3e50 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3651,13 +3684,14 @@
             modals.forEach(modal => document.body.removeChild(modal));
         }
 
-        // Safari mobile text visibility fix
+        // Safari text visibility fix (desktop and mobile)
         function fixSafariTextVisibility() {
-            // Detect mobile Safari
+            // Detect Safari (including desktop Safari)
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
             const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isMobile = window.innerWidth <= 480;
             
-            if (isMobileSafari || isMobile) {
+            if (isSafari || isMobileSafari || isMobile) {
                 // Remove all webkit text fill transparent properties
                 const allElements = document.querySelectorAll('*');
                 allElements.forEach(element => {
