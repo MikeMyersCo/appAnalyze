@@ -1883,6 +1883,9 @@
                         <button class="btn btn-secondary" onclick="showScreen('upload-screen')">
                             ← New Analysis
                         </button>
+                        <button class="btn" onclick="showResumeAnalysisResults()" style="background: #e74c3c;">
+                            📝 Resume Analysis Results
+                        </button>
                         <button class="btn btn-warning" onclick="previewClientReport()">
                             👁️ Preview Client Report
                         </button>
@@ -3779,6 +3782,525 @@
         function closeModal() {
             const modals = document.querySelectorAll('[style*="z-index: 2000"]');
             modals.forEach(modal => document.body.removeChild(modal));
+        }
+
+        // Resume Analysis Results - Section-by-section wording improvements
+        function showResumeAnalysisResults() {
+            const currentLevel = currentPilotData.experienceLevel;
+            const resumeAnalysisData = getResumeAnalysisData(currentLevel);
+            
+            const content = `
+                <div style="max-width: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">📝</div>
+                        <h3 style="color: #e74c3c; margin-bottom: 10px;">Section-by-Section Resume Improvements</h3>
+                        <p style="color: #7f8c8d; font-size: 16px;">Airline-preferred wording and terminology for ${currentLevel} pilots</p>
+                    </div>
+                    
+                    <div style="display: grid; gap: 25px;">
+                        ${resumeAnalysisData.sections.map(section => `
+                            <div style="border: 2px solid #ecf0f1; border-radius: 12px; padding: 20px; background: #f8f9fa;">
+                                <h4 style="color: #2c3e50; margin-bottom: 15px; font-size: 18px; font-weight: bold;">
+                                    ${section.icon} ${section.title}
+                                </h4>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <h5 style="color: #e74c3c; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">❌ Avoid</h5>
+                                    <div style="background: #fff5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                                        <p style="color: #c0392b; margin: 0; font-style: italic;">"${section.avoid}"</p>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <h5 style="color: #27ae60; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">✅ Airlines Prefer</h5>
+                                    <div style="background: #f0fff4; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
+                                        <p style="color: #196f3d; margin: 0; font-weight: 500;">"${section.prefer}"</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 style="color: #3498db; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">💡 Key Tips</h5>
+                                    <ul style="color: #2c3e50; margin: 0; padding-left: 20px;">
+                                        ${section.tips.map(tip => `<li style="margin-bottom: 8px;">${tip}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-align: center;">
+                        <h4 style="margin-bottom: 15px; color: white;">🎯 Industry Keywords for ${currentLevel.toUpperCase()} Pilots</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                            ${resumeAnalysisData.keywords.map(keyword => `
+                                <span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 500;">${keyword}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <button class="btn" onclick="closeModal()" style="background: #3498db; color: white; padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer;">
+                            Close Analysis
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            const modal = createModal('Resume Section Analysis', content);
+            document.body.appendChild(modal);
+        }
+
+        // Generate section-specific resume analysis data based on actual resume content
+        function getResumeAnalysisData(experienceLevel) {
+            // Analyze the actual uploaded resume content
+            const resumeText = parsedResumeContent.rawText || '';
+            const extractedData = parsedResumeContent.extractedData || {};
+            const hasResumeContent = resumeText.length > 50; // Minimum content check
+            
+            // Parse resume sections from actual content
+            const resumeSections = parseResumeIntoSections(resumeText);
+            const specificIssues = analyzeResumeIssues(resumeText, resumeSections, experienceLevel);
+            
+            // Generate specific recommendations based on actual resume content
+            const baseData = {
+                sections: [
+                    {
+                        icon: '📧',
+                        title: 'Contact Information',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.contact || 'Current contact section appears incomplete') :
+                            'John Smith, Pilot, john.smith@email.com, (555) 123-4567',
+                        prefer: generateContactImprovement(specificIssues.contact, resumeSections.contact, experienceLevel),
+                        tips: generateContactTips(specificIssues.contact)
+                    },
+                    {
+                        icon: '🎯',
+                        title: 'Professional Summary',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.summary || 'Current summary section is missing or too generic') :
+                            'Experienced pilot seeking airline position. Good safety record and team player.',
+                        prefer: generateSummaryImprovement(specificIssues.summary, resumeSections.summary, experienceLevel, extractedData),
+                        tips: generateSummaryTips(specificIssues.summary, experienceLevel)
+                    },
+                    {
+                        icon: '✈️',
+                        title: 'Flight Experience',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.experience || 'Current experience section lacks specific details') :
+                            'Pilot at Regional Airlines - Flew planes and completed flights safely',
+                        prefer: generateExperienceImprovement(specificIssues.experience, resumeSections.experience, experienceLevel, extractedData),
+                        tips: generateExperienceTips(specificIssues.experience)
+                    },
+                    {
+                        icon: '🎓',
+                        title: 'Education & Training',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.education || 'Education section needs aviation focus') :
+                            'Bachelor\'s Degree in Aviation, Flight School Graduate',
+                        prefer: specificIssues.education.hasAviationDegree ? 
+                            'Good aviation education foundation - consider highlighting specific coursework' :
+                            'Bachelor of Science in Aeronautical Science | Aviation University\nProfessional Pilot Training | ATP Flight School | Multi-Engine Rating',
+                        tips: specificIssues.education.hasAviationDegree ? 
+                            ['Highlight specific aviation coursework', 'Include relevant certifications', 'Mention flight training hours'] :
+                            ['List aviation-specific degree programs prominently', 'Include well-known aviation schools', 'Add relevant aviation coursework']
+                    },
+                    {
+                        icon: '📜',
+                        title: 'Certifications & Ratings',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.certifications || 'Certifications section needs professional formatting') :
+                            'Private Pilot License, Commercial License, Various Ratings',
+                        prefer: specificIssues.certifications.hasATP ? 
+                            'Consider adding certificate numbers and expiration dates' :
+                            `${experienceLevel === 'major' ? 'Airline Transport Pilot Certificate (ATP) - #12345678' : 'Commercial Multi-Engine Land (MEL) with Instrument Rating'}\n${experienceLevel === 'cfi' ? 'Certified Flight Instructor (CFI/CFII/MEI)' : ''}\nFirst Class Medical Certificate - Current`,
+                        tips: specificIssues.certifications.hasATP ? 
+                            ['Include certificate numbers', 'Add expiration dates', 'List in hierarchical order'] :
+                            ['List certifications in hierarchical order (ATP first)', 'Include certificate numbers for ATP', 'Specify class ratings (SEL, MEL)']
+                    },
+                    {
+                        icon: '🛠️',
+                        title: 'Technical Skills',
+                        avoid: hasResumeContent ? 
+                            (resumeSections.skills || 'Skills section needs aviation-specific terminology') :
+                            'Good with technology, Can use flight systems, Computer skills',
+                        prefer: specificIssues.skills.hasAvionics ? 
+                            'Good technical foundation - consider adding specific model numbers' :
+                            'Advanced Avionics: Garmin G1000/G3000, Collins Pro Line 21\nFlight Management Systems: FMS programming, RNAV procedures\nSafety: CRM certified, LOSA experience',
+                        tips: specificIssues.skills.hasAvionics ? 
+                            ['Add specific model numbers', 'Include software proficiency', 'Mention recent training'] :
+                            ['Specify exact avionics systems', 'Include FMS experience', 'List CRM and safety training']
+                    }
+                ],
+                keywords: generateKeywordsBasedOnAnalysis(specificIssues, experienceLevel, hasResumeContent)
+            };
+
+            // If no resume content is available, provide generic guidance
+            if (!hasResumeContent) {
+                baseData.sections.unshift({
+                    icon: '⚠️',
+                    title: 'Resume Analysis Note',
+                    avoid: 'No resume content could be extracted from the uploaded file.',
+                    prefer: 'For specific, actionable recommendations, please ensure your resume file is in a readable format (PDF with text, not scanned images).',
+                    tips: [
+                        'Upload a text-based PDF or Word document',
+                        'Avoid scanned images of resumes',
+                        'Ensure file is not corrupted or password-protected',
+                        'The following recommendations are based on your experience level'
+                    ]
+                });
+            }
+
+            // Customize content based on experience level
+            switch(experienceLevel) {
+                case 'student':
+                    baseData.sections[1].prefer = 'Dedicated student pilot with 80+ flight hours building toward Private Pilot License. Strong academic performance in aeronautical science program with focus on safety and professional development. Seeking entry-level aviation opportunities.';
+                    baseData.sections[2].prefer = 'Student Pilot | Local Flight Training | Cessna 172 | 2023-Present\n• 80+ flight hours in single-engine aircraft\n• 15+ cross-country flight hours\n• Solo endorsement with excellent safety record';
+                    baseData.keywords = ['Student Pilot', 'Solo Flight', 'Cross Country', 'Ground School', 'Private Pilot Training', 'Safety First', 'Aeronautical Knowledge', 'FAR/AIM'];
+                    break;
+                    
+                case 'private':
+                    baseData.sections[1].prefer = 'Private pilot with 150+ flight hours seeking to advance aviation career. Instrument rating in progress with strong foundational knowledge of aviation regulations and safety procedures. Committed to professional development.';
+                    baseData.sections[2].prefer = 'Private Pilot | Personal Flying | Cessna 172/182 | 2022-Present\n• 150+ flight hours PIC in single-engine aircraft\n• 45+ cross-country flight hours\n• Instrument training in progress';
+                    baseData.keywords = ['Private Pilot', 'Cross Country', 'IFR Training', 'PIC Time', 'Complex Aircraft', 'VFR', 'Navigation', 'Weather Decision Making'];
+                    break;
+                    
+                case 'commercial':
+                    baseData.sections[1].prefer = 'Commercial pilot with 300+ flight hours and instrument rating. Experience in single and multi-engine aircraft with strong foundation in commercial aviation operations. Seeking to build hours toward airline minimums.';
+                    baseData.keywords = ['Commercial Pilot', 'Multi-Engine', 'IFR', 'Complex Aircraft', 'Cross Country', 'High Performance', 'Commercial Operations', 'Hour Building'];
+                    break;
+                    
+                case 'cfi':
+                    baseData.sections[1].prefer = 'Certified Flight Instructor with 800+ flight hours and dual-given instruction experience. Expert in flight training methodologies, regulatory compliance, and safety management. Building experience toward airline career.';
+                    baseData.sections[2].prefer = 'Certified Flight Instructor | ABC Flight School | Cessna 172/Arrow | 2021-Present\n• 800+ flight hours (600+ PIC, 200+ dual given)\n• 400+ instrument hours including instruction\n• Trained 25+ students to PPL/IFR certification';
+                    baseData.keywords = ['CFI', 'CFII', 'MEI', 'Dual Given', 'Flight Training', 'Ground Instruction', 'Checkride Prep', 'Safety Management', 'Student Pilots'];
+                    break;
+                    
+                case 'regional':
+                    baseData.sections[1].prefer = 'Regional airline First Officer with 2,500+ flight hours in Part 121 operations. Proven expertise in crew resource management, turbine aircraft systems, and commercial aviation procedures. Seeking advancement to major carrier.';
+                    baseData.sections[2].prefer = 'First Officer | Skywest Airlines | CRJ-200/900 | 2020-Present\n• 2,500+ flight hours (1,200 PIC, 1,300 SIC)\n• 1,800+ turbine hours in Part 121 operations\n• 98.5% on-time performance rating';
+                    baseData.keywords = ['Part 121', 'Turbine Time', 'CRJ', 'ERJ', 'SIC Time', 'CRM', 'Line Check', 'IOE', 'Recurrent Training', 'Major Airline Ready'];
+                    break;
+                    
+                case 'major':
+                    baseData.sections[1].prefer = 'Experienced airline Captain with 8,000+ flight hours in domestic and international operations. Proven leadership in multi-crew environments with exceptional safety record and mentoring experience.';
+                    baseData.sections[2].prefer = 'Captain | American Airlines | A320 Family | 2015-Present\n• 8,000+ flight hours (5,500+ PIC in turbine aircraft)\n• International operations experience (ETOPS certified)\n• Line Check Airman and new-hire mentor';
+                    baseData.keywords = ['Captain', 'Wide Body', 'International', 'ETOPS', 'Line Check Airman', 'Mentor', 'A320', 'B737', 'Leadership', 'Major Airline'];
+                    break;
+            }
+
+            return baseData;
+        }
+
+        // Parse resume text into identifiable sections
+        function parseResumeIntoSections(resumeText) {
+            const text = resumeText.toLowerCase();
+            const sections = {
+                contact: '',
+                summary: '',
+                experience: '',
+                education: '',
+                certifications: '',
+                skills: ''
+            };
+
+            // Extract contact information (usually at the top)
+            const contactMatch = resumeText.match(/^(.{0,300})/s);
+            if (contactMatch) {
+                sections.contact = contactMatch[1].trim();
+            }
+
+            // Extract professional summary/objective
+            const summaryPatterns = [
+                /(?:professional\s+summary|summary|objective|profile)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i,
+                /(?:career\s+objective|personal\s+statement)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i
+            ];
+            for (const pattern of summaryPatterns) {
+                const match = resumeText.match(pattern);
+                if (match) {
+                    sections.summary = match[0].trim();
+                    break;
+                }
+            }
+
+            // Extract flight experience/work experience
+            const experiencePatterns = [
+                /(?:flight\s+experience|work\s+experience|experience|employment\s+history)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i,
+                /(?:pilot|captain|first\s+officer|flight\s+instructor|cfi)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i
+            ];
+            for (const pattern of experiencePatterns) {
+                const match = resumeText.match(pattern);
+                if (match) {
+                    sections.experience = match[0].trim();
+                    break;
+                }
+            }
+
+            // Extract education
+            const educationPattern = /(?:education|academic\s+background)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i;
+            const educationMatch = resumeText.match(educationPattern);
+            if (educationMatch) {
+                sections.education = educationMatch[0].trim();
+            }
+
+            // Extract certifications/licenses
+            const certificationPatterns = [
+                /(?:certifications?|licenses?|ratings?)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i,
+                /(?:atp|commercial|private|instrument|cfi|cfii|mei)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i
+            ];
+            for (const pattern of certificationPatterns) {
+                const match = resumeText.match(pattern);
+                if (match) {
+                    sections.certifications = match[0].trim();
+                    break;
+                }
+            }
+
+            // Extract skills
+            const skillsPattern = /(?:skills|technical\s+skills|additional\s+skills)[\s\S]*?(?=\n\s*[A-Z][^a-z\n]*\n|\n\s*\n|$)/i;
+            const skillsMatch = resumeText.match(skillsPattern);
+            if (skillsMatch) {
+                sections.skills = skillsMatch[0].trim();
+            }
+
+            return sections;
+        }
+
+        // Analyze specific issues in the actual resume content
+        function analyzeResumeIssues(resumeText, sections, experienceLevel) {
+            const text = resumeText.toLowerCase();
+            const issues = {};
+
+            // Contact section analysis
+            issues.contact = {
+                hasEmail: /@/.test(text),
+                hasPhone: /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/.test(text),
+                hasLinkedIn: /linkedin/.test(text),
+                hasTitle: /(captain|first officer|pilot|atp|cfi)/.test(text),
+                improvement: ''
+            };
+
+            // Professional summary analysis
+            issues.summary = {
+                hasHours: /\d+\s*(?:hour|hr)/.test(text),
+                hasSpecificAircraft: /(cessna|piper|boeing|airbus|crj|erj|a320|b737)/.test(text),
+                hasCertifications: /(atp|commercial|instrument|cfi)/.test(text),
+                isTooGeneric: /(?:seeking|experienced|good|team player)/.test(text) && !/\d+\s*(?:hour|hr)/.test(text),
+                improvement: ''
+            };
+
+            // Experience section analysis
+            issues.experience = {
+                hasSpecificAircraft: /(cessna|piper|boeing|airbus|crj|erj|embraer|bombardier)/.test(text),
+                hasOperationsType: /(part 121|part 135|part 91)/.test(text),
+                hasHourBreakdown: /(pic|sic|total time|instrument time)/.test(text),
+                hasQuantifiableResults: /\d+(?:%|departures|flights|hours|students)/.test(text),
+                usesGenericLanguage: /(flew planes|operated aircraft|good safety record)/.test(text),
+                improvement: ''
+            };
+
+            // Education analysis
+            issues.education = {
+                hasAviationDegree: /(aeronautical|aviation|aerospace|embry-riddle|und|atp flight school)/.test(text),
+                hasSchoolName: /(university|college|school)/.test(text),
+                improvement: ''
+            };
+
+            // Certifications analysis
+            issues.certifications = {
+                hasATP: /atp/.test(text),
+                hasRatings: /(instrument|multi|commercial|private)/.test(text),
+                hasCertNumbers: /#?\d{6,8}/.test(text),
+                hasMedical: /(first class|second class|third class|medical)/.test(text),
+                improvement: ''
+            };
+
+            // Skills analysis
+            issues.skills = {
+                hasAvionics: /(garmin|collins|honeywell|g1000|g3000)/.test(text),
+                hasFMS: /fms/.test(text),
+                hasSoftware: /(foreflight|jeppesen)/.test(text),
+                hasCRM: /crm/.test(text),
+                improvement: ''
+            };
+
+            return issues;
+        }
+
+        // Generate specific contact information improvements
+        function generateContactImprovement(issues, currentContact, experienceLevel) {
+            const currentName = currentPilotData.name || 'John Smith';
+            const title = experienceLevel === 'major' ? 'Captain' : 
+                         experienceLevel === 'regional' ? 'First Officer' : 
+                         experienceLevel === 'cfi' ? 'CFI' : 'Pilot';
+            
+            let improvement = `${title} ${currentName}`;
+            
+            if (experienceLevel === 'regional' || experienceLevel === 'major') {
+                improvement += ', ATP';
+            } else if (experienceLevel === 'cfi') {
+                improvement += ', CFI/CFII';
+            }
+            
+            improvement += ` | ${currentPilotData.email || 'professional@gmail.com'} | +1 (555) 123-4567`;
+            
+            if (!issues.hasLinkedIn) {
+                improvement += ' | LinkedIn: /in/yourname-pilot';
+            }
+            
+            return improvement;
+        }
+
+        // Generate contact tips based on analysis
+        function generateContactTips(issues) {
+            const tips = [];
+            
+            if (!issues.hasTitle) {
+                tips.push('Add professional title (Captain, First Officer, CFI) after your name');
+            }
+            if (!issues.hasLinkedIn) {
+                tips.push('Include LinkedIn profile with aviation focus');
+            }
+            if (!issues.hasEmail) {
+                tips.push('Use professional email address (Gmail preferred over Yahoo/Hotmail)');
+            }
+            
+            tips.push('Include city/state for location reference');
+            tips.push('Use consistent formatting throughout');
+            
+            return tips;
+        }
+
+        // Generate summary improvements based on actual content
+        function generateSummaryImprovement(issues, currentSummary, experienceLevel, extractedData) {
+            const totalHours = extractedData.totalHours || '1,500+';
+            
+            if (issues.isTooGeneric) {
+                return `${experienceLevel === 'major' ? 'Experienced airline Captain' : 
+                        experienceLevel === 'regional' ? 'Regional airline First Officer' :
+                        experienceLevel === 'cfi' ? 'Certified Flight Instructor' : 
+                        'Commercial pilot'} with ${totalHours} flight hours and exemplary safety record. Proven expertise in ${
+                        experienceLevel === 'major' ? 'international operations, crew leadership' :
+                        experienceLevel === 'regional' ? 'Part 121 operations, CRM' :
+                        'flight training, regulatory compliance'} and professional aviation operations.`;
+            }
+            
+            return currentSummary || 'Add specific flight hours, certifications, and quantifiable achievements to strengthen your professional summary.';
+        }
+
+        // Generate summary tips
+        function generateSummaryTips(issues, experienceLevel) {
+            const tips = [];
+            
+            if (!issues.hasHours) {
+                tips.push('Lead with total flight hours (if 500+)');
+            }
+            if (!issues.hasSpecificAircraft) {
+                tips.push('Mention specific aircraft types flown');
+            }
+            if (!issues.hasCertifications) {
+                tips.push('Include key certifications (ATP, Commercial, CFI)');
+            }
+            if (issues.isTooGeneric) {
+                tips.push('Replace generic terms with specific achievements');
+            }
+            
+            tips.push('Target the specific position level you are seeking');
+            
+            return tips;
+        }
+
+        // Generate experience improvements
+        function generateExperienceImprovement(issues, currentExperience, experienceLevel, extractedData) {
+            if (issues.usesGenericLanguage || !issues.hasSpecificAircraft) {
+                const title = experienceLevel === 'major' ? 'Captain' : 'First Officer';
+                const airline = experienceLevel === 'major' ? 'Major Airlines' : 'Regional Express Airlines';
+                const aircraft = experienceLevel === 'major' ? 'A320 Family' : 'ERJ-145';
+                const totalHours = extractedData.totalHours || '2,500+';
+                const picHours = Math.floor((extractedData.totalHours || 2500) * 0.6);
+                const sicHours = Math.floor((extractedData.totalHours || 2500) * 0.4);
+                
+                return `${title} | ${airline} | ${aircraft} | 2019-Present\n• ${totalHours} flight hours (${picHours} PIC, ${sicHours} SIC)\n• ${extractedData.turbineHours || '1,800+'} turbine hours in Part 121 operations\n• Zero incidents across 1,200+ departures`;
+            }
+            
+            return currentExperience || 'Add specific aircraft types, hour breakdowns, and quantifiable safety achievements.';
+        }
+
+        // Generate experience tips
+        function generateExperienceTips(issues) {
+            const tips = [];
+            
+            if (!issues.hasSpecificAircraft) {
+                tips.push('Use specific aircraft model designations (ERJ-145, CRJ-900, A320)');
+            }
+            if (!issues.hasHourBreakdown) {
+                tips.push('Break down hours: Total, PIC, SIC, Instrument, Cross-Country');
+            }
+            if (!issues.hasOperationsType) {
+                tips.push('Mention Part 121/135/91 operations specifically');
+            }
+            if (!issues.hasQuantifiableResults) {
+                tips.push('Include safety metrics and quantifiable achievements');
+            }
+            
+            tips.push('Use aviation-standard terminology (PIC, SIC, IMC, VMC)');
+            
+            return tips;
+        }
+
+        // Generate keywords based on resume analysis
+        function generateKeywordsBasedOnAnalysis(issues, experienceLevel, hasContent) {
+            let keywords = [];
+            
+            // Add keywords based on what's missing or present in resume
+            if (issues.certifications?.hasATP) {
+                keywords.push('ATP Certified');
+            } else {
+                keywords.push('ATP');
+            }
+            
+            if (issues.experience?.hasOperationsType) {
+                keywords.push('Part 121 Operations');
+            } else {
+                keywords.push('Part 121', 'Part 135');
+            }
+            
+            if (issues.experience?.hasHourBreakdown) {
+                keywords.push('PIC Experience', 'SIC Time');
+            } else {
+                keywords.push('PIC', 'SIC', 'Flight Hours');
+            }
+            
+            if (issues.skills?.hasAvionics) {
+                keywords.push('Glass Cockpit Expert');
+            } else {
+                keywords.push('Garmin G1000', 'Glass Cockpit');
+            }
+            
+            // Add experience-level specific keywords
+            switch(experienceLevel) {
+                case 'student':
+                    keywords.push('Student Pilot', 'Training', 'Solo Flight');
+                    break;
+                case 'private':
+                    keywords.push('Private Pilot', 'VFR', 'Cross Country');
+                    break;
+                case 'commercial':
+                    keywords.push('Commercial Pilot', 'IFR', 'Multi-Engine');
+                    break;
+                case 'cfi':
+                    keywords.push('CFI', 'Flight Instructor', 'Dual Given');
+                    break;
+                case 'regional':
+                    keywords.push('Regional Airline', 'Turbine Time', 'CRM');
+                    break;
+                case 'major':
+                    keywords.push('Captain', 'International', 'Leadership');
+                    break;
+            }
+            
+            // Add generic important keywords
+            keywords.push('Safety Record', 'CRM', 'FMS', 'RNAV');
+            
+            return keywords;
         }
 
         // Safari text visibility fix (desktop and mobile)
