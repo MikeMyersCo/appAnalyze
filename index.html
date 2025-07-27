@@ -3651,9 +3651,62 @@
             modals.forEach(modal => document.body.removeChild(modal));
         }
 
+        // Safari mobile text visibility fix
+        function fixSafariTextVisibility() {
+            // Detect mobile Safari
+            const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isMobile = window.innerWidth <= 480;
+            
+            if (isMobileSafari || isMobile) {
+                // Remove all webkit text fill transparent properties
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(element => {
+                    const style = window.getComputedStyle(element);
+                    if (style.webkitTextFillColor === 'rgba(0, 0, 0, 0)' || 
+                        style.webkitTextFillColor === 'transparent' ||
+                        element.style.webkitTextFillColor === 'transparent') {
+                        element.style.webkitTextFillColor = '#2c3e50';
+                        element.style.color = '#2c3e50';
+                    }
+                });
+                
+                // Fix specific problematic elements
+                const mainHeading = document.querySelector('h2[style*="background-clip: text"]');
+                if (mainHeading) {
+                    mainHeading.style.background = 'none';
+                    mainHeading.style.webkitBackgroundClip = 'unset';
+                    mainHeading.style.backgroundClip = 'unset';
+                    mainHeading.style.webkitTextFillColor = '#2c3e50';
+                    mainHeading.style.color = '#2c3e50';
+                }
+                
+                // Fix any elements with gradient backgrounds
+                const gradientElements = document.querySelectorAll('[style*="background: linear-gradient"], [style*="background: var(--primary-gradient)"]');
+                gradientElements.forEach(element => {
+                    if (element.tagName.match(/^H[1-6]$/) || element.tagName === 'P') {
+                        element.style.background = 'none';
+                        element.style.webkitTextFillColor = '#2c3e50';
+                        element.style.color = '#2c3e50';
+                    }
+                });
+                
+                // Override body background for better contrast
+                document.body.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+                
+                console.log('Safari mobile text visibility fixes applied');
+            }
+        }
+
         // Final initialization and cleanup
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Crosswinds Coaching Internal Resume Analyzer - Ready for Business Use');
+            
+            // Apply Safari fixes
+            fixSafariTextVisibility();
+            
+            // Re-apply fixes after any dynamic content changes
+            const observer = new MutationObserver(fixSafariTextVisibility);
+            observer.observe(document.body, { childList: true, subtree: true });
             
             // Add keyboard shortcuts for power users
             document.addEventListener('keydown', function(e) {
