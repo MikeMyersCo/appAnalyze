@@ -1397,6 +1397,78 @@
                 color: #2c3e50 !important;
                 -webkit-text-fill-color: #2c3e50 !important;
             }
+            
+            /* Fix glassmorphism backgrounds for Safari */
+            .main-content {
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border: 1px solid #e0e0e0 !important;
+            }
+            
+            .upload-form {
+                background: rgba(255, 255, 255, 0.98) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border: 1px solid #ddd !important;
+            }
+            
+            .admin-header {
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border-bottom: 1px solid #e0e0e0 !important;
+            }
+            
+            /* Fix form elements visibility */
+            input, select, textarea {
+                background: white !important;
+                border: 2px solid #ddd !important;
+                color: #2c3e50 !important;
+                -webkit-appearance: none !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+            }
+            
+            input:focus, select:focus, textarea:focus {
+                border-color: #3498db !important;
+                box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;
+                outline: none !important;
+            }
+            
+            /* Fix drag-drop area */
+            .drag-drop-area {
+                background: rgba(248, 249, 250, 0.95) !important;
+                border: 2px dashed #bbb !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            
+            .drag-drop-area.drag-over {
+                border-color: #3498db !important;
+                background: rgba(52, 152, 219, 0.1) !important;
+            }
+            
+            /* Fix buttons */
+            .btn {
+                background: #3498db !important;
+                color: white !important;
+                border: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            
+            .btn:hover {
+                background: #2980b9 !important;
+            }
+            
+            /* Fix any remaining glassmorphism elements */
+            *[style*="backdrop-filter"] {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 1px solid #e0e0e0 !important;
+            }
         }
     </style>
 </head>
@@ -3727,7 +3799,34 @@
                 // Override body background for better contrast
                 document.body.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
                 
-                console.log('Safari mobile text visibility fixes applied');
+                // Fix form elements that might be invisible
+                const formElements = document.querySelectorAll('input, select, textarea');
+                formElements.forEach(element => {
+                    element.style.background = 'white';
+                    element.style.border = '2px solid #ddd';
+                    element.style.color = '#2c3e50';
+                    element.style.webkitAppearance = 'none';
+                });
+                
+                // Fix glassmorphism backgrounds
+                const glassElements = document.querySelectorAll('.main-content, .upload-form, .admin-header');
+                glassElements.forEach(element => {
+                    element.style.background = 'rgba(255, 255, 255, 0.95)';
+                    element.style.backdropFilter = 'none';
+                    element.style.webkitBackdropFilter = 'none';
+                    element.style.border = '1px solid #e0e0e0';
+                });
+                
+                // Fix drag-drop area
+                const dragArea = document.querySelector('.drag-drop-area');
+                if (dragArea) {
+                    dragArea.style.background = 'rgba(248, 249, 250, 0.95)';
+                    dragArea.style.border = '2px dashed #bbb';
+                    dragArea.style.backdropFilter = 'none';
+                    dragArea.style.webkitBackdropFilter = 'none';
+                }
+                
+                console.log('Safari text and background visibility fixes applied');
             }
         }
 
