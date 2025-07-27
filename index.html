@@ -1314,6 +1314,56 @@
                 background: rgba(255, 255, 255, 0.95) !important;
                 color: #2c3e50 !important;
             }
+            
+            /* Safari-specific fixes */
+            * {
+                -webkit-text-fill-color: unset !important;
+            }
+            
+            /* Force text colors for Safari */
+            h1, h2, h3, h4, h5, h6, p, span, div, label, input, textarea, select {
+                color: #2c3e50 !important;
+                -webkit-text-fill-color: #2c3e50 !important;
+            }
+            
+            /* Specific overrides for gradient text that should stay gradient */
+            h2[style*="background-clip: text"],
+            h2[style*="-webkit-background-clip: text"] {
+                background: none !important;
+                color: #2c3e50 !important;
+                -webkit-text-fill-color: #2c3e50 !important;
+                -webkit-background-clip: unset !important;
+                background-clip: unset !important;
+            }
+            
+            /* Fix any remaining transparent text */
+            *[style*="-webkit-text-fill-color: transparent"] {
+                -webkit-text-fill-color: #2c3e50 !important;
+                color: #2c3e50 !important;
+            }
+            
+            /* Ensure form elements are visible */
+            .form-group label {
+                color: #2c3e50 !important;
+                -webkit-text-fill-color: #2c3e50 !important;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                color: #2c3e50 !important;
+                background: white !important;
+                border: 1px solid #ddd !important;
+            }
+            
+            /* Fix any gradient backgrounds that break text */
+            *[style*="background: var(--primary-gradient)"] {
+                background: none !important;
+            }
+            
+            *[style*="background: linear-gradient"] {
+                background: rgba(255, 255, 255, 0.95) !important;
+            }
         }
     </style>
 </head>
